@@ -14,6 +14,10 @@ extern uint8_t reverse8(uint8_t x);
 static int kw9015b_callback(bitbuffer_t *bitbuffer) {
 	bitrow_t *bb = bitbuffer->bb;
 
+/************* custom script callback *****************/
+	static float fLastTemp=0;
+	static int iLastRain=0;
+/******************************************************/
 
 	int i,iRain,device;
 	unsigned char chksum;
@@ -49,7 +53,22 @@ static int kw9015b_callback(bitbuffer_t *bitbuffer) {
 				reverse8(bb[i][2]),
 				reverse8(bb[i][3]),
 				reverse8(bb[i][4]));
-
+/************* custom script callback *****************/
+				if((iRain!=iLastRain)||(fTemp!=fLastTemp)){
+					sprintf(buf,"/usr/local/bin/rtl_433_hook %d %f %d 0 %02X%02X%02X%02X%02X",
+					device,
+					fTemp,
+					iRain,
+					reverse8(bb[i][0]),
+					reverse8(bb[i][1]),
+					reverse8(bb[i][2]),
+					reverse8(bb[i][3]),
+					reverse8(bb[i][4]));
+					system(buf);
+				}
+				iLastRain=iRain;
+				fLastTemp=fTemp;
+/******************************************************/
 
 				return 1;
 			}

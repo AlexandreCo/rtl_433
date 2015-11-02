@@ -1,0 +1,12 @@
+#!/bin/bash
+device=$1
+temp=$2
+rain=$3
+bat=$4
+raw=$5
+DATE=`date "+%Y-%m-%d"`
+TIME=`date "+%H:%M:%S"`
+FILENAME=/home/pi/log/$DATE"_data.txt"
+# cpt;date;time;temp;press;humi;temp2;bat;rain;raw;
+echo "$device;$DATE;$TIME;$temp;0;0;0.0;$bat;$rain;$raw" >>  $FILENAME
+

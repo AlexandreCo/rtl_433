@@ -11,6 +11,10 @@
 static int generic_temperature_sensor_callback(bitbuffer_t *bitbuffer) {
 	bitrow_t *bb = bitbuffer->bb;
 
+/************* custom script callback *****************/
+	static float fLastTemp=0;
+/******************************************************/
+
 	int i,device,battery;
 	char buf[255];
 	float fTemp;
@@ -39,6 +43,13 @@ static int generic_temperature_sensor_callback(bitbuffer_t *bitbuffer) {
 	fprintf(stdout, "Model         = Generic temperature sensor 1\n");
 	fprintf(stdout, "Received Data = %02x %02x %02x\n", bb[1][0], bb[1][1], bb[1][2]);
 
+/************* custom script callback *****************/
+	if(fTemp!=fLastTemp){
+		sprintf(buf,"/usr/local/bin/rtl_433_hook 111 %f 0 %d %02x%02x%02x",fTemp,battery, bb[1][0], bb[1][1], bb[1][2]);
+		system(buf);
+	}
+	fLastTemp=fTemp;
+/******************************************************/
 
 
 	return 1;
