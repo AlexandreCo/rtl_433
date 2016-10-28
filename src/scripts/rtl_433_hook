@@ -4,9 +4,9 @@ temp=$2
 rain=$3
 bat=$4
 raw=$5
+humidity=$6
 DATE=`date "+%Y-%m-%d"`
 TIME=`date "+%H:%M:%S"`
 FILENAME=/home/pi/log/$DATE"_data.txt"
 # cpt;date;time;temp;press;humi;temp2;bat;rain;raw;
-echo "$device;$DATE;$TIME;$temp;0;0;0.0;$bat;$rain;$raw" >>  $FILENAME
-
+echo "$device;$DATE;$TIME;$temp;0;$humidity;0.0;$bat;$rain;$raw" >>  $FILENAME

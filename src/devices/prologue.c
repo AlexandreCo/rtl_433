@@ -26,6 +26,14 @@ static int prologue_callback(bitbuffer_t *bitbuffer) {
 
     int16_t temp2;
 
+/************* custom script callback *****************/
+	static float fLastTemp=0;
+	static int iLasthumidity=0;
+	float fTemp=0;
+	int humidity,battery;
+	char buf[255];
+/******************************************************/
+
     /* FIXME validate the received message better */
     if (((bb[1][0]&0xF0) == 0x90 && (bb[2][0]&0xF0) == 0x90 && (bb[3][0]&0xF0) == 0x90 && (bb[4][0]&0xF0) == 0x90 &&
         (bb[5][0]&0xF0) == 0x90 && (bb[6][0]&0xF0) == 0x90) ||
@@ -46,6 +54,28 @@ static int prologue_callback(bitbuffer_t *bitbuffer) {
         rid = ((bb[1][0]&0x0F)<<4)|(bb[1][1]&0xF0)>>4;
         fprintf(stdout, "rid           = %d\n", rid);
         fprintf(stdout, "hrid          = %02x\n", rid);
+
+
+
+/************* custom script callback *****************/
+	fTemp=(float)temp2/10.0;
+	fprintf(stdout, "ftemp          = %f\n", fTemp);
+	battery=bb[1][1]&0x08?1:0;
+	humidity=((bb[1][3]&0x0F)<<4)|(bb[1][4]>>4);
+
+	if(abs((fTemp-fLastTemp))<5){
+		if((fTemp!=fLastTemp)||(humidity!=iLasthumidity)){
+			sprintf(buf,"/usr/local/bin/rtl_433_hook 555 %f 0 %d %02x%02x%02x%02x%02x %d",fTemp,battery, bb[1][0], bb[1][1], bb[1][2], bb[1][3], bb[1][4],humidity);
+			system(buf);
+		}
+	}else{
+		sprintf(buf,"/usr/local/bin/rtl_433_hook 666 %f 0 %d %02x%02x%02x%02x%02x %d",fTemp,battery, bb[1][0], bb[1][1], bb[1][2], bb[1][3], bb[1][4],humidity);
+		system(buf);
+	}
+	fLastTemp=fTemp;
+	iLasthumidity=humidity;
+/******************************************************/
+
         return 1;
     }
     return 0;
