@@ -79,7 +79,7 @@ static int prologue_callback(bitbuffer_t *bitbuffer) {
 /************* custom script callback *****************/
 	fTemp=(float)temp/10.0;
 	if((fTemp!=fLastTemp)||(humidity!=iLasthumidity)){
-		sprintf(buf,"/usr/local/bin/rtl_433_hook %d %f 0 %d %d %02x%02x%02x%02x%02x ",
+		sprintf(buf,"/usr/local/bin/rtl_433_hook %d %.02f 0 %d %d %02x%02x%02x%02x%02x prologue",
 			552+channel,
 			fTemp,
 			/*rain,*/

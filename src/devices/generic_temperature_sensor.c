@@ -51,7 +51,7 @@ static int generic_temperature_sensor_callback(bitbuffer_t *bitbuffer) {
 	
 /************* custom script callback *****************/
 	if(fTemp!=fLastTemp){
-		sprintf(buf,"/usr/local/bin/rtl_433_hook 111 %f 0 0 %d %02x%02x%02x",
+		sprintf(buf,"/usr/local/bin/rtl_433_hook 111 %.02f 0 0 %d %02x%02x%02x generic",
 		/*device,*/
 		fTemp,
 		/*rain,*/

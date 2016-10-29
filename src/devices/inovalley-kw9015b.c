@@ -68,7 +68,7 @@ static int kw9015b_callback(bitbuffer_t *bitbuffer) {
         data_acquired_handler(data);
 
 				if((iRain!=iLastRain)||(fTemp!=fLastTemp)){
-					sprintf(buf,"/usr/local/bin/rtl_433_hook %d %f %d 0 0 %02X%02X%02X%02X%02X",
+					sprintf(buf,"/usr/local/bin/rtl_433_hook %d %.02f %d 0 0 %02X%02X%02X%02X%02X kw9015b",
 					device,
 					fTemp,
 					iRain,
