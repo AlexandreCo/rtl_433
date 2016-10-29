@@ -32,6 +32,12 @@ static int prologue_callback(bitbuffer_t *bitbuffer) {
 
     char time_str[LOCAL_TIME_BUFLEN];
 
+/************* custom script callback *****************/
+	static float fLastTemp=0;
+	static int iLasthumidity=0;
+	float fTemp=0;
+	char buf[255];
+/******************************************************/
     uint8_t model;
     uint8_t id;
     uint8_t battery;
@@ -70,6 +76,22 @@ static int prologue_callback(bitbuffer_t *bitbuffer) {
                          "humidity",      "Humidity",    DATA_FORMAT, "%u %%", DATA_INT, humidity,
                           NULL);
         data_acquired_handler(data);
+/************* custom script callback *****************/
+	fTemp=(float)temp/10.0;
+	if((fTemp!=fLastTemp)||(humidity!=iLasthumidity)){
+		sprintf(buf,"/usr/local/bin/rtl_433_hook %d %f 0 %d %d %02x%02x%02x%02x%02x ",
+			552+channel,
+			fTemp,
+			/*rain,*/
+			humidity,
+			battery,
+			bb[1][0], bb[1][1], bb[1][2], bb[1][3], bb[1][4]
+			);
+		system(buf);
+	}
+	fLastTemp=fTemp;
+	iLasthumidity=humidity;
+/******************************************************/
 
         return 1;
     }

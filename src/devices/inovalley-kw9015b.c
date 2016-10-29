@@ -1,5 +1,6 @@
 #include "rtl_433.h"
 #include "util.h"
+#include "data.h"
 /* Inovalley kw9015b rain and Temperature weather station
  *
  * Copyright (C) 2015 Alexandre Coffignal
@@ -14,7 +15,12 @@ extern uint8_t reverse8(uint8_t x);
 static int kw9015b_callback(bitbuffer_t *bitbuffer) {
 	bitrow_t *bb = bitbuffer->bb;
 
-
+/************* custom script callback *****************/
+	data_t *data;
+	static float fLastTemp=0;
+	static int iLastRain=0;
+	char time_str[LOCAL_TIME_BUFLEN];
+/******************************************************/
 	int i,iRain,device;
 	unsigned char chksum;
 	float fTemp;
@@ -38,6 +44,8 @@ static int kw9015b_callback(bitbuffer_t *bitbuffer) {
 				(reverse8(bb[i][3])>>4)+(reverse8(bb[i][3])&0x0F));
 
 			if( (chksum&0x0F) == ( reverse8(bb[i][4]) &0x0F)){
+/************* custom script callback *****************
+
 				fprintf(stdout, "\nSensor        = Temperature and rain event\n");
 				fprintf(stdout, "Device        = %d\n", device);
 				fprintf(stdout, "Temp          = %f\n",fTemp);
@@ -48,8 +56,34 @@ static int kw9015b_callback(bitbuffer_t *bitbuffer) {
 				reverse8(bb[i][1]),
 				reverse8(bb[i][2]),
 				reverse8(bb[i][3]),
-				reverse8(bb[i][4]));
+				reverse8(bb[i][4]));*/
+        /* Get time now */
+        local_time_str(0, time_str);
+        data = data_make("time",          "",            DATA_STRING, time_str,
+                         "model",         "",            DATA_STRING, "kw9015b sensor",
+                         "id",            "",            DATA_INT, device, // this should be named "type"
+                         "temperature_C", "Temperature", DATA_FORMAT, "%.02f C", DATA_DOUBLE, fTemp,
+			 "rainfall_mm",   "Rainfall",    DATA_FORMAT, "%3.2f mm",DATA_DOUBLE, (float)iRain*0.4,
+                          NULL);
+        data_acquired_handler(data);
 
+				if((iRain!=iLastRain)||(fTemp!=fLastTemp)){
+					sprintf(buf,"/usr/local/bin/rtl_433_hook %d %f %d 0 0 %02X%02X%02X%02X%02X",
+					device,
+					fTemp,
+					iRain,
+					/*humidity,*/
+					/*baterry,*/
+					reverse8(bb[i][0]),
+					reverse8(bb[i][1]),
+					reverse8(bb[i][2]),
+					reverse8(bb[i][3]),
+					reverse8(bb[i][4]));
+					system(buf);
+				}
+				iLastRain=iRain;
+				fLastTemp=fTemp;
+/******************************************************/
 
 				return 1;
 			}
@@ -68,6 +102,6 @@ r_device kw9015b = {
   .long_limit    = 4800,
   .reset_limit   = 10000,
   .json_callback = &kw9015b_callback,
-  .disabled      = 1,
+  .disabled      = 0,
   .demod_arg     = 0,
 };

@@ -14,6 +14,10 @@
 
 static int generic_temperature_sensor_callback(bitbuffer_t *bitbuffer) {
 	bitrow_t *bb = bitbuffer->bb;
+/************* custom script callback *****************/
+	static float fLastTemp=0;
+	char buf[255];
+/******************************************************/
 	data_t *data;
 	char time_str[LOCAL_TIME_BUFLEN];
     local_time_str(0, time_str);
@@ -45,6 +49,19 @@ static int generic_temperature_sensor_callback(bitbuffer_t *bitbuffer) {
                      NULL);
     data_acquired_handler(data);
 	
+/************* custom script callback *****************/
+	if(fTemp!=fLastTemp){
+		sprintf(buf,"/usr/local/bin/rtl_433_hook 111 %f 0 0 %d %02x%02x%02x",
+		/*device,*/
+		fTemp,
+		/*rain,*/
+		/*humidity*/
+		battery,
+		bb[1][0], bb[1][1], bb[1][2]);
+		system(buf);
+	}
+	fLastTemp=fTemp;
+/******************************************************/
     return 1; 
 	
 }
